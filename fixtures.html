@@ -17,49 +17,55 @@
      data-hover-background-color="#57bbec" 
      data-url="northern-premier-league-east-division/fixtures-results"></div>
 <script src="https://www.footballwebpages.co.uk/embed.js" defer></script>
-  <script>
+ 
+<script>
   window.addEventListener('DOMContentLoaded', () => {
-    // Poll briefly to wait for the third-party widget to build its DOM
+    // Poll briefly until the FWP widget finishes building its table
     const checkWidget = setInterval(() => {
       const widgetContainer = document.querySelector('.fwp-embed');
-      const rows = widgetContainer ? widgetContainer.querySelectorAll('tr, .date-header, header, h3') : [];
+      const table = widgetContainer ? widgetContainer.querySelector('table') : null;
 
-      if (rows.length > 0) {
-        clearInterval(checkWidget); // Stop polling once loaded
+      if (table) {
+        clearInterval(checkWidget); // Widget found! Stop polling.
 
-        // Start boundary: Today at 00:00:00
+        // 1. Define our 8-day date window (Today + next 7 days)
         const startWindow = new Date();
         startWindow.setHours(0, 0, 0, 0);
 
-        // End boundary: Today + 7 days at 23:59:59
         const endWindow = new Date(startWindow);
         endWindow.setDate(startWindow.getDate() + 7);
         endWindow.setHours(23, 59, 59, 999);
 
-        // Track visibility state as we iterate through rows
-        let isCurrentSectionInWindow = false;
+        let isCurrentDateInWindow = false;
 
-        widgetContainer.querySelectorAll('tr').forEach(row => {
-          // Check if this row is a date header (e.g., "Saturday 3rd October")
-          const text = row.textContent.trim();
-          const parsedDate = Date.parse(text.replace(/(\d+)(st|nd|rd|th)/, '$1'));
+        // 2. Loop through every table row in order
+        table.querySelectorAll('tr').forEach(row => {
+          const rowText = row.textContent.trim();
 
-          if (!isNaN(parsedDate)) {
+          // Check if this row is a Date Header (e.g., "Saturday 3rd October" or "Tuesday 6th October")
+          // We look for month names or ordinal suffixes (1st, 2nd, 3rd, 4th)
+          const cleanText = rowText.replace(/(\d+)(st|nd|rd|th)/i, '$1');
+          const parsedDate = Date.parse(cleanText);
+
+          // If the row contains a valid date string, update our state
+          if (!isNaN(parsedDate) && (rowText.includes('2026') || rowText.match(/January|February|March|April|May|June|July|August|September|October|November|December/i))) {
             const rowDate = new Date(parsedDate);
-            // Check if the section's date falls within [Today, Today + 7 Days]
-            isCurrentSectionInWindow = (rowDate >= startWindow && rowDate <= endWindow);
+            
+            // Check if this date falls between today and 7 days from now
+            isCurrentDateInWindow = (rowDate >= startWindow && rowDate <= endWindow);
           }
 
-          // If the section date is outside the next 7 days, hide the row
-          if (!isCurrentSectionInWindow) {
+          // 3. Hide or show the row depending on the active date section
+          if (!isCurrentDateInWindow) {
             row.style.display = 'none';
+          } else {
+            row.style.display = ''; // Restore default row visibility
           }
         });
       }
     }, 200); // Check every 200ms
   });
-</script>
-  
+</script>  
   Hallam Fixtures
   
   <div class="fwp-embed" data-font-family="Open Sans" data-border-color="#316395" data-heading-color="#030303" data-hover-background-color="#57bbec" data-url="hallam/fixtures-results"></div>
