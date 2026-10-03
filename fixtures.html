@@ -10,13 +10,55 @@
 
   <body>
 
-  <iframe 
-  src="https://www.footballwebpages.co.uk/northern-premier-league-east-division/fixtures-results/today" 
-  width="100%" 
-  height="600" 
-  style="border: 1px solid #316395; border-radius: 6px;" 
-  loading="lazy">
-</iframe>
+  <div class="fwp-embed" 
+     data-font-family="Open Sans" 
+     data-border-color="#316395" 
+     data-heading-color="#030303" 
+     data-hover-background-color="#57bbec" 
+     data-url="northern-premier-league-east-division/fixtures-results"></div>
+<script src="https://www.footballwebpages.co.uk/embed.js" defer></script>
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    // Poll briefly to wait for the third-party widget to build its DOM
+    const checkWidget = setInterval(() => {
+      const widgetContainer = document.querySelector('.fwp-embed');
+      const rows = widgetContainer ? widgetContainer.querySelectorAll('tr, .date-header, header, h3') : [];
+
+      if (rows.length > 0) {
+        clearInterval(checkWidget); // Stop polling once loaded
+
+        // Start boundary: Today at 00:00:00
+        const startWindow = new Date();
+        startWindow.setHours(0, 0, 0, 0);
+
+        // End boundary: Today + 7 days at 23:59:59
+        const endWindow = new Date(startWindow);
+        endWindow.setDate(startWindow.getDate() + 7);
+        endWindow.setHours(23, 59, 59, 999);
+
+        // Track visibility state as we iterate through rows
+        let isCurrentSectionInWindow = false;
+
+        widgetContainer.querySelectorAll('tr').forEach(row => {
+          // Check if this row is a date header (e.g., "Saturday 3rd October")
+          const text = row.textContent.trim();
+          const parsedDate = Date.parse(text.replace(/(\d+)(st|nd|rd|th)/, '$1'));
+
+          if (!isNaN(parsedDate)) {
+            const rowDate = new Date(parsedDate);
+            // Check if the section's date falls within [Today, Today + 7 Days]
+            isCurrentSectionInWindow = (rowDate >= startWindow && rowDate <= endWindow);
+          }
+
+          // If the section date is outside the next 7 days, hide the row
+          if (!isCurrentSectionInWindow) {
+            row.style.display = 'none';
+          }
+        });
+      }
+    }, 200); // Check every 200ms
+  });
+</script>
   
   Hallam Fixtures
   
