@@ -10,62 +10,40 @@
 
   <body>
 
-  <div class="fwp-embed" 
+  <!-- Container element for Football Web Pages widget -->
+<div id="fwp-container" 
+     class="fwp-embed" 
      data-font-family="Open Sans" 
      data-border-color="#316395" 
      data-heading-color="#030303" 
-     data-hover-background-color="#57bbec" 
-     data-url="northern-premier-league-east-division/fixtures-results"></div>
-<script src="https://www.footballwebpages.co.uk/embed.js" defer></script>
- 
+     data-hover-background-color="#57bbec"></div>
+
 <script>
-  window.addEventListener('DOMContentLoaded', () => {
-    // Poll briefly until the FWP widget finishes building its table
-    const checkWidget = setInterval(() => {
-      const widgetContainer = document.querySelector('.fwp-embed');
-      const table = widgetContainer ? widgetContainer.querySelector('table') : null;
+  (function() {
+    // 1. Get today's date parts
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const day = String(today.getDate()).padStart(2, '0');
 
-      if (table) {
-        clearInterval(checkWidget); // Widget found! Stop polling.
+    // 2. Build the YYYYMMDD date string (e.g. "20261003")
+    const dateStr = `${year}${month}${day}`;
 
-        // 1. Define our 8-day date window (Today + next 7 days)
-        const startWindow = new Date();
-        startWindow.setHours(0, 0, 0, 0);
+    // 3. Set the target URL dynamically on the container element
+    const container = document.getElementById('fwp-container');
+    container.setAttribute(
+      'data-url', 
+      `northern-premier-league-east-division/${dateStr}`
+    );
 
-        const endWindow = new Date(startWindow);
-        endWindow.setDate(startWindow.getDate() + 7);
-        endWindow.setHours(23, 59, 59, 999);
-
-        let isCurrentDateInWindow = false;
-
-        // 2. Loop through every table row in order
-        table.querySelectorAll('tr').forEach(row => {
-          const rowText = row.textContent.trim();
-
-          // Check if this row is a Date Header (e.g., "Saturday 3rd October" or "Tuesday 6th October")
-          // We look for month names or ordinal suffixes (1st, 2nd, 3rd, 4th)
-          const cleanText = rowText.replace(/(\d+)(st|nd|rd|th)/i, '$1');
-          const parsedDate = Date.parse(cleanText);
-
-          // If the row contains a valid date string, update our state
-          if (!isNaN(parsedDate) && (rowText.includes('2026') || rowText.match(/January|February|March|April|May|June|July|August|September|October|November|December/i))) {
-            const rowDate = new Date(parsedDate);
-            
-            // Check if this date falls between today and 7 days from now
-            isCurrentDateInWindow = (rowDate >= startWindow && rowDate <= endWindow);
-          }
-
-          // 3. Hide or show the row depending on the active date section
-          if (!isCurrentDateInWindow) {
-            row.style.display = 'none';
-          } else {
-            row.style.display = ''; // Restore default row visibility
-          }
-        });
-      }
-    }, 200); // Check every 200ms
-  });
-</script>  
+    // 4. Inject the embed script AFTER setting the attribute
+    const fwpScript = document.createElement('script');
+    fwpScript.src = "https://www.footballwebpages.co.uk/embed.js";
+    fwpScript.defer = true;
+    document.body.appendChild(fwpScript);
+  })();
+</script>
+    
   Hallam Fixtures
   
   <div class="fwp-embed" data-font-family="Open Sans" data-border-color="#316395" data-heading-color="#030303" data-hover-background-color="#57bbec" data-url="hallam/fixtures-results"></div>
